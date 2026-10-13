@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Simulador de mensajes sospechosos · USTA Tunja</title>
+<style>
+:root{--blue:#0b2a5b;--deep:#06142e;--gold:#f4b400;--ink:#12213f;--line:#27427a;--pan:#0f2552cc;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;min-height:100vh;color:#eef3fb;font:17px/1.5 "Segoe UI",system-ui,-apple-system,Arial,sans-serif;background:radial-gradient(900px 520px at 50% -5%,#1d4e9e 0,var(--blue) 50%,var(--deep) 100%) fixed}
+header{display:flex;align-items:center;gap:14px;padding:12px 22px;border-bottom:4px solid var(--gold);background:#06142ecc;backdrop-filter:blur(8px)}
+header h1{font-size:1.2rem;margin:0}header b{color:var(--gold)}header small{display:block;color:#b9c6e0}
+.keys{margin-left:auto;font-size:.82rem;color:#b9c6e0;text-align:right}
+main{display:grid;grid-template-columns:250px minmax(300px,1fr) 340px;gap:18px;padding:18px;max-width:1300px;margin:0 auto;align-items:start}
+@media(max-width:980px){main{grid-template-columns:1fr}}
+.panel{background:var(--pan);border:1px solid var(--line);border-radius:16px;padding:14px;backdrop-filter:blur(6px)}
+.panel h2{font-size:.85rem;margin:0 0 10px;color:var(--gold);letter-spacing:.08em;text-transform:uppercase}
+.list button{display:flex;gap:9px;align-items:center;width:100%;text-align:left;background:transparent;color:inherit;border:1px solid transparent;border-radius:10px;padding:6px 8px;font:inherit;font-size:.92rem;cursor:pointer;transition:.2s}
+.list button:hover{background:#142d5e}.list button.cur{background:#142d5e;border-color:var(--gold)}
+.n{width:24px;height:24px;border-radius:50%;background:var(--gold);color:var(--ink);font-weight:800;display:grid;place-items:center;font-size:.8rem;flex:none}
+.st{margin-left:auto}
+.bar{height:6px;background:#142d5e;border-radius:6px;margin:12px 0;overflow:hidden}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),#ffd24d);transition:width .5s}
+.sc{display:flex;gap:12px;align-items:center;margin-top:8px}
+.ring{width:74px;height:74px;border-radius:50%;display:grid;place-items:center;flex:none}
+.ring span{width:56px;height:56px;border-radius:50%;background:#0b2a5b;display:grid;place-items:center;font-weight:800;font-size:1.05rem}
+.stage{display:flex;flex-direction:column;align-items:center;gap:14px}
+.phone{--z:1;position:relative;height:min(720px,80vh);aspect-ratio:9/18.8;background:linear-gradient(145deg,#2a3550,#0a0f1e 40%,#1c2540);border-radius:50px;padding:10px;box-shadow:0 0 0 2px #56688f,0 0 0 9px #0a1b3d,0 40px 80px #000b,0 0 80px #f4b40030}
+.phone::before{content:"";position:absolute;left:-12px;top:20%;width:4px;height:60px;background:#56688f;border-radius:3px 0 0 3px;box-shadow:0 85px 0 #56688f}
+.phone::after{content:"";position:absolute;right:-12px;top:28%;width:4px;height:90px;background:#56688f;border-radius:0 3px 3px 0}
+.phone.buzz{animation:buzz .45s 3}
+@keyframes buzz{0%,100%{transform:none}25%{transform:translateX(-6px) rotate(-.8deg)}75%{transform:translateX(6px) rotate(.8deg)}}
+.notch{position:absolute;top:19px;left:50%;transform:translateX(-50%);width:30%;height:24px;background:#000;border-radius:20px;z-index:9}
+.screen{height:100%;border-radius:40px;overflow:hidden;background:#fff;color:#111;display:flex;flex-direction:column;position:relative;font-size:calc(15px*var(--z))}
+.screen::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,#ffffff18,transparent 32%);z-index:7}
+.hi{position:absolute;bottom:7px;left:50%;transform:translateX(-50%);width:34%;height:5px;border-radius:5px;background:#000;opacity:.6;z-index:8}
+.lock .hi,.call .hi{background:#fff}
+.sb{display:flex;justify-content:space-between;padding:14px 26px 6px;font-size:.8em;font-weight:700;z-index:2}
+.lock{background:radial-gradient(500px 300px at 80% 0,#f4b40040,transparent),linear-gradient(165deg,#1d4e9e,#0b2a5b 55%,#06142e);color:#fff}
+.lock .sb,.call .sb{color:#fff}
+.clock{text-align:center;margin-top:2.4em;font-size:4.2em;font-weight:200;line-height:1}
+.date{text-align:center;opacity:.85;margin-bottom:2em}
+.banner{margin:0 .7em;background:#ffffffe6;color:#111;border-radius:1.2em;padding:.7em .8em;display:flex;gap:.6em;cursor:pointer;animation:drop .7s cubic-bezier(.2,1.4,.4,1);backdrop-filter:blur(10px);position:relative}
+@keyframes drop{from{transform:translateY(-140px);opacity:0}}
+.banner em{position:absolute;right:.8em;top:.5em;font-size:.7em;color:#777;font-style:normal}
+.ico{width:2.4em;height:2.4em;border-radius:.6em;display:grid;place-items:center;font-size:1.1em;flex:none;color:#fff}
+.banner b{display:block;font-size:.88em}.banner span{font-size:.82em;color:#333;display:block}
+.swipe{margin-top:auto;text-align:center;padding-bottom:2.4em;font-size:.8em;opacity:.8;animation:bl 2s infinite}
+.app-h{display:flex;align-items:center;gap:.6em;padding:.5em .7em .6em;color:#fff;z-index:2}
+.app-h small{display:block;opacity:.8;font-size:.75em}.back{font-size:1.6em;line-height:1}
+.av{width:2.3em;height:2.3em;border-radius:50%;background:#cfd8dc;color:#455a64;display:grid;place-items:center;font-weight:700;flex:none}
+.body{flex:1;min-height:0;overflow:auto;padding:.7em;display:flex;flex-direction:column;gap:.5em;scroll-behavior:smooth}
+.wa .app-h{background:#075e54}.wa .body{background-color:#e7ddd0;background-image:radial-gradient(#0000000f 1px,transparent 1.5px);background-size:14px 14px}
+.sms .app-h{background:#f7f7f9;color:#111;flex-direction:column;gap:.1em;border-bottom:1px solid #ddd;padding-top:.2em}.sms .body{background:#fff}
+.mail .app-h{background:#fff;color:#555;border-bottom:1px solid #eee}.mail .body{background:#fff;color:#222}
+.chip{align-self:center;background:#e1f2fb;font-size:.7em;padding:.25em .8em;border-radius:.6em;color:#555}
+.b{position:relative;max-width:84%;padding:.5em .7em 1.25em;border-radius:0 .7em .7em .7em;background:#fff;box-shadow:0 1px 1px #0003;align-self:flex-start;animation:pop .35s;line-height:1.35}
+.b small{position:absolute;right:.5em;bottom:.2em;font-size:.65em;color:#777}
+.b::before{content:"";position:absolute;left:-.45em;top:0;border:.45em solid transparent;border-top-color:#fff;border-right-color:#fff}
+.sms .b{background:#e5e5ea;border-radius:1.1em;padding-bottom:.55em}.sms .b::before,.sms .b small{display:none}
+@keyframes pop{from{transform:scale(.85) translateY(10px);opacity:0}}
+.dots{display:inline-flex;gap:4px;padding:.7em .9em;background:#fff;border-radius:.9em;width:4em;align-self:flex-start}
+.dots i{width:.5em;height:.5em;border-radius:50%;background:#999;animation:bl 1s infinite}.dots i:nth-child(2){animation-delay:.2s}.dots i:nth-child(3){animation-delay:.4s}
+@keyframes bl{50%{opacity:.3;transform:translateY(-3px)}}
+.au{display:flex;gap:.5em;align-items:center;padding-bottom:1.3em}.pl{width:2em;height:2em;border-radius:50%;background:#128c7e;color:#fff;display:grid;place-items:center;font-size:.8em}
+.wv{display:flex;align-items:center;gap:2px;height:1.6em}.wv i{width:3px;background:#8fa3a0;border-radius:2px}
+.tr{align-self:flex-start;max-width:92%;font-size:.8em;background:#fff8d6;border:1px dashed #d4b200;padding:.4em .6em;border-radius:.6em;color:#333;animation:pop .35s}
+.input{display:flex;gap:.5em;padding:.5em .6em 1.6em;background:#f0f0f0;align-items:center}.input div{flex:1;background:#fff;border-radius:1.2em;padding:.45em .9em;color:#999;font-size:.9em}
+.mail h3{font-size:1.15em;margin:.2em 0;font-weight:500}.mh{display:flex;gap:.6em;align-items:center}.mh .av{background:#d93025;color:#fff}.mh small{display:block;color:#777;font-size:.75em}
+.cta{align-self:flex-start;background:#1a73e8;color:#fff;border-radius:.5em;padding:.6em 1em;font-weight:600;margin-top:.3em}
+.mf{font-size:.7em;color:#888;border-top:1px solid #eee;padding-top:.6em;margin-top:auto}
+.call{background:radial-gradient(circle at 50% 15%,#34507f,#10192b 70%);color:#fff}
+.call .body{align-items:center;text-align:center;gap:.4em;padding:.8em}
+.face{width:6em;height:6em;border-radius:50%;background:#2c3b57;display:grid;place-items:center;font-size:2.6em;margin:1em 0 .2em;animation:rg 1.3s infinite}
+.rg0{animation:none}@keyframes rg{0%{box-shadow:0 0 0 0 #4ade8099}100%{box-shadow:0 0 0 2.2em #4ade8000}}
+.call .b{background:#ffffff22;color:#fff;max-width:100%;align-self:stretch;border-radius:.8em;padding-bottom:.5em;text-align:left}.call .b::before,.call .b small{display:none}
+.cbtns{display:flex;justify-content:space-around;width:100%;margin-top:auto;padding:.6em 0 2.2em}
+.cbtn{width:3.6em;height:3.6em;border-radius:50%;display:grid;place-items:center;font-size:1.3em;border:0;cursor:pointer;color:#fff;background:#e53935}.cbtn.g{background:#2ecc71;animation:rg 1.3s infinite}
+mark{background:transparent;color:inherit;position:relative;border-radius:.2em;transition:background .6s,box-shadow .6s}
+.rev mark{background:#ffd24d;color:#111;box-shadow:0 0 0 2px #ffd24d}
+.rev mark::after{content:attr(data-n);position:absolute;top:-.95em;right:-.6em;background:#d93025;color:#fff;width:1.5em;height:1.5em;font-size:.7em;border-radius:50%;display:grid;place-items:center;font-weight:800;animation:pop .4s}
+.stamp{position:absolute;top:36%;left:50%;z-index:9;font-size:2.6em;font-weight:900;letter-spacing:.06em;padding:.1em .45em;border:.1em solid;border-radius:.2em;background:#fffc;opacity:0;pointer-events:none;transform:translate(-50%,-50%) rotate(-14deg)}
+.stamp.f{color:#d93025}.stamp.r{color:#188038}
+.rev .stamp{animation:st .7s cubic-bezier(.2,1.5,.4,1) forwards}
+@keyframes st{from{opacity:0;transform:translate(-50%,-50%) rotate(-14deg) scale(3)}to{opacity:.95;transform:translate(-50%,-50%) rotate(-14deg) scale(1)}}
+.verdict{position:absolute;left:.7em;right:.7em;bottom:1.6em;border-radius:1em;padding:.7em .9em;text-align:center;font-weight:600;font-size:.88em;transform:translateY(200%);transition:transform .6s cubic-bezier(.2,1.3,.4,1);z-index:9;box-shadow:0 8px 24px #0006;color:#fff}
+.rev .verdict{transform:none}.verdict.f{background:#d93025}.verdict.r{background:#188038}
+.ctl{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.btn{background:var(--gold);color:var(--ink);border:0;border-radius:12px;padding:10px 18px;font:inherit;font-weight:700;cursor:pointer;transition:.15s;box-shadow:0 3px 0 #a37a00}
+.btn:active{transform:translateY(2px);box-shadow:none}.btn.g{background:#142d5e;color:#fff;border:1px solid var(--line);box-shadow:none}.btn:disabled{opacity:.4;cursor:default}
+.btn.s{padding:6px 12px;font-size:.9rem}
+.q{font-size:1.15rem;font-weight:700;padding:10px 12px;background:#142d5e;border-left:5px solid var(--gold);border-radius:8px}
+.sig{display:flex;gap:9px;align-items:center;margin:5px 0;padding:3px 6px;border-radius:8px;opacity:.5;transition:.4s}
+.sig.hit{opacity:1;background:#ffd24d26;box-shadow:inset 0 0 0 1px var(--gold)}.sig.dim{opacity:.25}
+.sig i{width:24px;height:24px;border-radius:50%;background:var(--gold);color:var(--ink);font-style:normal;font-weight:800;display:grid;place-items:center;flex:none;font-size:.85rem}
+.why{margin-top:10px;background:#142d5e;border-radius:10px;padding:10px 12px;font-size:.95rem;display:none}
+.why b{color:var(--gold)}
+.hint{font-size:.82rem;color:#b9c6e0;margin-top:10px}
+#sum{position:fixed;inset:0;background:#06142ee6;display:none;place-items:center;z-index:50;backdrop-filter:blur(6px)}
+#sum .card{background:var(--blue);border:2px solid var(--gold);border-radius:20px;padding:30px 40px;text-align:center;max-width:520px;animation:pop .5s}
+#sum .big{font-size:1.6rem;font-weight:800;color:var(--gold);margin:.4em 0}#sum ol{text-align:left}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header><div style="font-size:1.8rem">📱</div><div><h1>Simulador de <b>mensajes sospechosos</b></h1><small>Universidad Santo Tomás · Seccional Tunja · Educación Continua</small></div><div class="keys">Espacio: avanzar · ← → : cambiar caso<br>F: pantalla completa · S: sonido</div></header>
+<main>
+<aside class="panel"><h2>Casos</h2><div class="list" id="list"></div>
+<div class="bar"><i id="pg"></i></div>
+<div class="sc"><div class="ring" id="ring"><span id="sc">0/0</span></div><div>Aciertos<br>del grupo</div></div></aside>
+<section class="stage">
+<div class="phone" id="phone"><div class="notch"></div><div class="screen" id="screen"></div></div>
+<div class="ctl"><button class="btn g" id="prev">← Anterior</button><button class="btn" id="go">Abrir mensaje</button><button class="btn g" id="next">Siguiente →</button></div>
+</section>
+<aside class="panel"><h2>Guía del presentador</h2>
+<div class="q" id="q"></div>
+<div style="margin-top:12px"><b>Las 5 señales de alarma</b><div id="sigs"></div></div>
+<div class="why" id="why"></div>
+<div class="ctl" style="margin-top:12px;justify-content:flex-start"><button class="btn g" id="yes">👍 Acertaron</button><button class="btn g" id="no">👎 Fallaron</button></div>
+<div class="ctl" style="margin-top:10px;justify-content:flex-start"><button class="btn g s" id="zm">A−</button><button class="btn g s" id="zp">A+</button><button class="btn g s" id="sn">🔔 Sonido: sí</button></div>
+<div class="hint">Deje que el grupo responda a coro y luego revele.</div></aside>
+</main>
+<div id="sum"></div>
+<script>
+const SEN={1:'Urgencia o secreto',2:'Premio o herencia',3:'Pide datos, claves o códigos',4:'Enlace o remitente raro',5:'Pide dinero'};
+const S=[
+{ch:'wa',name:'Nieto 🆕',num:'+57 311 000 0000 (nuevo)',real:false,flags:[1,4,5],msgs:['Hola abuelo, soy yo. [[Cambié de número|4]] 😅','Estoy en un [[apuro|1]] y [[necesito que me consigne $400.000 hoy|5]]','[[No le diga a nadie|1]], luego le explico 🙏'],why:'Fingen ser un familiar con número nuevo y piden plata con prisa y en secreto.',tip:'Llame a su nieto al número de siempre antes de enviar nada.'},
+{ch:'sms',name:'BANCO-SEGURO',num:'Mensaje de texto',real:false,flags:[1,3,4],msgs:['Su cuenta será [[bloqueada en 2 horas|1]]. [[Actualice sus datos|3]] aquí: [[bit.ly/banco-seguro-co|4]]'],why:'El banco no bloquea cuentas por mensaje ni pide actualizar datos con enlaces.',tip:'No toque el enlace. Llame al número impreso en su tarjeta.'},
+{ch:'mail',name:'Premios Ganador Ya',addr:'premios@ganador-ya.xyz',num:'Correo',real:false,flags:[2,3,4,5],subject:'¡Felicidades! Ganó una [[camioneta 0 km|2]]',msgs:['Para reclamarla envíe [[copia de su cédula y número de cuenta|3]] y [[pague $150.000 de trámite|5]].'],link:'[[reclamar-premio-ya.xyz|4]]',why:'Nadie gana premios de concursos en los que no participó. Pedir pago por adelantado es la señal clásica.',tip:'Elimínelo y no responda. Marque como spam.'},
+{ch:'call',name:'“Fiscalía” · número privado',num:'Llamada entrante',real:false,flags:[1,5],msgs:['Su cédula aparece en un proceso judicial.','[[No cuelgue|1]] ni le cuente a nadie.','Para evitar un embargo, [[haga un pago hoy|5]].'],why:'Ninguna entidad cobra por teléfono ni exige silencio.',tip:'Cuelgue y llame a la entidad por su número oficial.'},
+{ch:'wa',name:'Doña Marta (vecina)',num:'Contacto guardado',real:false,flags:[3,4],msgs:['Hola, se me equivocó un código con su número 😓','[[Me lo reenvía, son 6 números|3]]'],why:'Con ese código roban la cuenta de WhatsApp. A veces la cuenta de la vecina ya fue hackeada.',tip:'Nunca comparta códigos. Llame a la vecina para confirmar.'},
+{ch:'wa',name:'Hijo (número nuevo)',num:'+57 300 000 0000',real:false,flags:[1,5],msgs:[{a:'0:14',t:'Mamá, tuve un accidente. [[Necesito $2.000.000 ya|5]]. [[No me llame|1]], consígnelo a esta cuenta.'}],why:'Con inteligencia artificial se puede imitar la voz de un familiar. Aunque suene igual, puede ser falso.',tip:'Llame a su hijo al número de siempre o use la palabra secreta de la familia.'},
+{ch:'sms',name:'Su EPS',num:'Mensaje de texto',real:true,flags:[],msgs:['Recordatorio: cita de medicina general el 15/10 a las 8:00 a.m. Si no puede asistir, cancélela en la línea oficial de su EPS.'],why:'Avisa algo que usted esperaba, sin enlaces, sin datos y sin dinero.',tip:'Puede confiar, pero si duda, llame a la línea oficial.'},
+{ch:'wa',name:'Hija ❤️',num:'Contacto guardado',real:true,flags:[],msgs:['Mamá, ya salí del trabajo, llego en 20 minutos.','¿Necesita algo del mercado?'],why:'Viene de un contacto conocido y no pide dinero, claves ni secretos.',tip:'Mensaje normal de familia.'},
+{ch:'sms',name:'Su banco',num:'Mensaje de texto',real:true,flags:[],msgs:['Aviso: su banco nunca le pedirá claves ni códigos por mensaje o llamada. Ante dudas, llame al número de su tarjeta.'],why:'Es solo un aviso de prevención, sin enlaces ni peticiones.',tip:'Buen recordatorio: guárdelo en la mente.'},
+{ch:'mail',name:'Educación Continua · USTA Tunja',addr:'educacion.continua',num:'Correo',real:true,flags:[],subject:'Recordatorio: Taller ActivaMente Saludable',msgs:['Le recordamos el taller al que se inscribió. Si tiene dudas, comuníquese con la oficina de Educación Continua.'],link:'',why:'Usted se inscribió, el remitente es conocido y no pide datos ni dinero.',tip:'Mensaje esperado y sin riesgo.'}];
+const IC={wa:['💬','#25d366','WhatsApp'],sms:['✉️','#5b7bd5','Mensajes'],mail:['📧','#d93025','Correo'],call:['📞','#188038','Teléfono']};
+let i=0,step=0,T=[],CI,res={},ok=0,tot=0,z=1,snd=true,AC;
+const $=id=>document.getElementById(id),esc=t=>t.replace(/&/g,'&amp;').replace(/</g,'&lt;'),mk=t=>esc(t).replace(/\[\[(.+?)\|(\d)\]\]/g,'<mark data-n="$2">$1</mark>');
+const hm=m=>{const d=new Date(Date.now()-m*6e4);return d.getHours()+':'+String(d.getMinutes()).padStart(2,'0')},clr=()=>{T.forEach(clearTimeout);T=[];clearInterval(CI)};
+const bp=(f,d,t=0,v=.15,ty='sine')=>{if(!snd)return;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain(),n=AC.currentTime+t;o.type=ty;o.frequency.value=f;g.gain.setValueAtTime(v,n);g.gain.exponentialRampToValueAtTime(.001,n+d);o.connect(g);g.connect(AC.destination);o.start(n);o.stop(n+d)}catch(e){}};
+const tn={n:()=>{bp(880,.15);bp(1175,.25,.15)},r:()=>[0,.6].forEach(t=>{bp(440,.4,t,.12);bp(480,.4,t,.12)}),ok:()=>{bp(660,.15);bp(880,.3,.15)},bad:()=>bp(200,.6,0,.2,'sawtooth'),p:()=>bp(1000,.07,0,.06)};
+const sb=()=>`<div class="sb"><span>${hm(0)}</span><span>5G ▂▄▆ 🔋87%</span></div>`;
+const wave=()=>Array.from({length:22},()=>`<i style="height:${20+Math.random()*80}%"></i>`).join('');
+const bub=(t,k,n)=>typeof t=='object'?`<div class="b au"><span class="pl">▶</span><span class="wv">${wave()}</span><span style="font-size:.8em">${t.a}</span><small>${hm(n-k)}</small></div><div class="tr">🔊 Lo que dice el audio: ${mk(t.t)}</div>`:`<div class="b">${mk(t)}<small>${hm(n-k)}</small></div>`;
+function draw(){clr();const s=S[i],c=IC[s.ch],ph=$('phone'),sc=$('screen'),R=step>1,call=s.ch=='call';
+ph.classList.remove('rev','buzz');const ini=(s.name.replace(/[^\p{L}]/gu,'')[0]||'?');
+$('go').textContent=step==0?(call?'Contestar':'Abrir mensaje'):step==1?'Revelar respuesta':(i==S.length-1?'Ver resumen':'Siguiente caso');
+$('q').textContent=step<2?'Pregunte al grupo: ¿real o falso? ¿Qué señales ven?':(s.real?'✅ Es REAL':'⚠️ Es una ESTAFA');
+$('sigs').innerHTML=Object.entries(SEN).map(([k,v])=>`<div class="sig ${R?(s.flags.includes(+k)?'hit':'dim'):''}"><i>${k}</i>${v}${R&&s.flags.includes(+k)?' ✔':''}</div>`).join('');
+$('why').style.display=R?'block':'none';$('why').innerHTML=`<b>¿Por qué?</b> ${esc(s.why)}<br><b>¿Qué hacer?</b> ${esc(s.tip)}`;
+$('yes').disabled=$('no').disabled=!R||res[i]!==undefined;
+if(step==0){
+ if(call){sc.className='screen call';sc.innerHTML=`${sb()}<div class="body"><small>Llamada entrante…</small><div class="face">👤</div><b style="font-size:1.3em">${esc(s.name)}</b><small>Teléfono · celular</small></div><div class="cbtns"><button class="cbtn" onclick="step=2;draw();tn.bad()">📵</button><button class="cbtn g" onclick="adv()">📞</button></div><div class="hi"></div>`;tn.r()}
+ else{sc.className='screen lock';sc.innerHTML=`${sb()}<div class="clock">${hm(0)}</div><div class="date">viernes, 9 de octubre</div><div class="banner" onclick="adv()"><div class="ico" style="background:${c[1]}">${c[0]}</div><div><b>${c[2]} · ${esc(s.name.replace(/[“”]/g,''))}</b><span>${s.ch=='mail'?mk(s.subject).replace(/<[^>]+>/g,''):esc(typeof s.msgs[0]=='object'?'🎤 Mensaje de voz (0:14)':s.msgs[0].replace(/\[\[|\|\d\]\]/g,'')).slice(0,80)}</span><em>ahora</em></div></div><div class="swipe">Toque la notificación para abrir</div><div class="hi"></div>`;tn.n()}
+ ph.classList.add('buzz');}
+else{sc.className='screen '+s.ch;let h,b,f='';
+ if(call){h='';b=`<div class="body"><div class="face ${R?'rg0':''}">👤</div><b style="font-size:1.2em">${esc(s.name)}</b><small id="ct">${R?'Llamada finalizada':'En llamada 00:00'}</small><div id="m" style="display:flex;flex-direction:column;gap:.5em;width:100%;margin-top:.8em"></div></div><div class="cbtns"><button class="cbtn" onclick="step=2;draw();tn.bad()">📵</button></div><div class="hi"></div>`}
+ else if(s.ch=='mail'){h=`<div class="app-h"><span class="back">‹</span><b style="flex:1"></b><span>🗑 ✉️</span></div>`;b=`<div class="body"><h3>${mk(s.subject)}</h3><div class="mh"><div class="av">${ini}</div><div><b>${esc(s.name)}</b><small>${esc(s.addr)} · para mí · ${hm(0)}</small></div></div><div id="m" style="display:flex;flex-direction:column;gap:.5em"></div>${s.link?`<div class="cta">${mk(s.link)}</div>`:''}<div class="mf">Si no desea recibir más mensajes, ignore este correo.</div></div><div class="hi"></div>`}
+ else{const w=s.ch=='wa';h=w?`<div class="app-h"><span class="back">‹</span><div class="av">${ini}</div><div style="flex:1"><b>${esc(s.name)}</b><small>en línea</small></div><span>📹 📞</span></div>`:`<div class="app-h"><div class="av">${ini}</div><b>${esc(s.name)}</b><small>${esc(s.num)}</small></div>`;b=`<div class="body" id="m"><div class="chip">HOY</div></div><div class="input"><span>${w?'😊':'＋'}</span><div>${w?'Mensaje':'Mensaje de texto'}</div><span>${w?'🎤':'➤'}</span></div><div class="hi"></div>`}
+ sc.innerHTML=sb()+h+b+`<div class="stamp ${s.real?'r':'f'}">${s.real?'REAL':'ESTAFA'}</div><div class="verdict ${s.real?'r':'f'}">${s.real?'✅':'⚠️'} ${esc(s.tip)}</div>`;
+ const m=$('m'),box=m.closest('.body')||m,go=()=>box.scrollTop=box.scrollHeight;
+ if(call&&!R){let n=0;CI=setInterval(()=>{n++;$('ct').textContent='En llamada 00:'+String(n).padStart(2,'0')},1000)}
+ s.msgs.forEach((t,k)=>{if(R){m.insertAdjacentHTML('beforeend',bub(t,k,s.msgs.length));return}
+  T.push(setTimeout(()=>{const d=document.createElement('div');d.className='dots';d.innerHTML='<i></i><i></i><i></i>';m.appendChild(d);go();T.push(setTimeout(()=>{d.outerHTML=bub(t,k,s.msgs.length);tn.p();go()},900))},k*2200))});
+ if(R)ph.classList.add('rev');}
+list()}
+function list(){$('list').innerHTML=S.map((s,k)=>`<button class="${k==i?'cur':''}" onclick="jump(${k})"><span class="n">${k+1}</span>${IC[s.ch][0]} ${esc(s.name.replace(/[“”🆕❤️]/g,'')).slice(0,17)}<span class="st">${res[k]===true?'✅':res[k]===false?'❌':''}</span></button>`).join('');
+$('pg').style.width=((i+(step>1?1:0))/S.length*100)+'%';$('sc').textContent=ok+'/'+tot;$('ring').style.background=`conic-gradient(#f4b400 ${tot?ok/tot*100:0}%,#142d5e 0)`}
+function adv(){if(step<2){step++;draw();if(step==2)S[i].real?tn.ok():tn.bad()}else if(i==S.length-1)summary();else jump(i+1)}
+function jump(k){i=k;step=0;draw()}
+function score(v){res[i]=v;tot++;if(v)ok++;$('yes').disabled=$('no').disabled=true;list()}
+function summary(){$('sum').innerHTML=`<div class="card"><h2 style="color:var(--gold)">¡Muy bien!</h2><p>El grupo acertó <b>${ok}</b> de <b>${tot}</b> casos votados.</p><div class="big">PARE · PIENSE · PREGUNTE</div><ol><li>¿Hay prisa, premio o piden plata?</li><li>¿Piden claves o códigos?</li><li>Llame usted al número de siempre.</li></ol><button class="btn" onclick="restart()">Reiniciar</button></div>`;$('sum').style.display='grid'}
+function restart(){res={};ok=tot=0;$('sum').style.display='none';jump(0)}
+function zoom(d){z=Math.min(1.4,Math.max(.8,z+d));$('phone').style.setProperty('--z',z)}
+function sound(){snd=!snd;$('sn').textContent='🔔 Sonido: '+(snd?'sí':'no')}
+$('go').onclick=adv;$('next').onclick=()=>jump((i+1)%S.length);$('prev').onclick=()=>jump((i+S.length-1)%S.length);
+$('yes').onclick=()=>score(true);$('no').onclick=()=>score(false);$('zm').onclick=()=>zoom(-.1);$('zp').onclick=()=>zoom(.1);$('sn').onclick=sound;
+addEventListener('keydown',e=>{if($('sum').style.display=='grid')return;if(e.code=='Space'){e.preventDefault();adv()}else if(e.key=='ArrowRight')$('next').click();else if(e.key=='ArrowLeft')$('prev').click();else if(e.key=='s'||e.key=='S')sound();else if(e.key=='f'||e.key=='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen()}});
+draw();
+</script>
+</body>
+</html>
